@@ -151,6 +151,37 @@ point the platform at `backend/`, deploy, grab the public URL.)
 
 ---
 
+## Troubleshooting: "Detection failed" / live camera not working
+
+**"Detection failed. Is the API running and reachable?"**
+The Detect page now shows a health banner at the top that tells you exactly why (unreachable,
+timed out, or up-but-demo-mode) — check that first. Common causes, in order of likelihood:
+
+1. **`VITE_API_URL` still points at `localhost:8000`** in your deployed Vercel build. Local
+   URLs are not reachable from a deployed site. Set the real backend URL as an environment
+   variable in the Vercel project settings and redeploy.
+2. **The backend isn't deployed yet**, or crashed after deploy. Check your Render/Railway
+   logs — the most common crash cause is running out of memory. `Dockerfile` now runs a
+   **single** gunicorn worker on purpose: each worker loads its own full copy of the YOLO
+   model into memory, so 2 workers = 2x memory. Give the service at least ~1–1.5 GB RAM.
+3. **Cold start timeout.** Free tiers on Render/Railway spin the service down when idle;
+   the first request after that can take 30–50s to wake up. The frontend now waits up to
+   60s before giving up, but if you still see timeouts, ping `/api/health/` in a browser
+   tab first to wake it, then try detection again.
+4. **CORS.** If you disable `CORS_ALLOW_ALL_ORIGINS`, make sure `CORS_ALLOWED_ORIGINS`
+   includes your exact deployed frontend URL (including `https://`).
+
+**Live camera stuck / not detecting**
+- Camera access requires **HTTPS or localhost** — this is enforced by the browser, not this
+  app. Testing over plain `http://` on a non-localhost address will refuse to start the
+  camera (the app now says this explicitly instead of failing silently).
+- If you clicked "Start camera" and got no permission prompt at all, check your browser's
+  site permissions — a previously denied camera permission won't re-prompt automatically.
+- Live mode calls the same `/api/detect/` endpoint as photo upload every ~1.5s, so any of
+  the API issues above will also show up here.
+
+---
+
 ## Project structure
 
 ```

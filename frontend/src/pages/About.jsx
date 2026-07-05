@@ -9,7 +9,12 @@ export default function About() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-mildew mb-4">The Research</p>
-      <h1 className="font-display text-3xl mb-6">FedYOLO-Dual</h1>
+      <h1 className="font-display text-3xl mb-2">FedYOLO-Dual</h1>
+      <p className="text-mist text-sm mb-6">
+        Multi-Class Apple Leaf and Fruit Disease Detection for Agro-Pathology Driven by a
+        Privacy-Preserving Federated Learning Framework with Organ-Aware Dual-Stream YOLO and
+        Explainable AI
+      </p>
       <p className="text-mist leading-relaxed mb-6">
         A privacy-preserving, organ-aware apple pathology detector built on lightweight YOLO
         backbones (YOLOv8n, YOLO11n, YOLO11s), trained on a unified 8-class leaf and fruit

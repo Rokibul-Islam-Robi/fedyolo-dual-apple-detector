@@ -3,7 +3,7 @@ import { detectFromBase64 } from "../api.js";
 import DetectionCanvas from "./DetectionCanvas.jsx";
 import ResultsPanel from "./ResultsPanel.jsx";
 
-const CAPTURE_INTERVAL_MS = 1200;
+const CAPTURE_INTERVAL_MS = 1500;
 
 export default function LiveDetector() {
   const videoRef = useRef(null);
@@ -14,20 +14,48 @@ export default function LiveDetector() {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
   const intervalRef = useRef(null);
+  const busyRef = useRef(false);
 
   async function start() {
     setError(null);
+
+    if (!window.isSecureContext) {
+      setError(
+        "Camera access requires HTTPS (or localhost). This page is being served over plain HTTP — deploy behind HTTPS to use the live camera."
+      );
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("This browser doesn't support camera access (getUserMedia unavailable).");
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
-      setDims({ w: videoRef.current.videoWidth, h: videoRef.current.videoHeight });
+      const video = videoRef.current;
+      video.srcObject = stream;
+
+      // videoWidth/videoHeight are only reliable once metadata has loaded —
+      // reading them immediately after play() is a race condition that
+      // silently produces a 0x0 canvas on some browsers.
+      await new Promise((resolve) => {
+        video.onloadedmetadata = () => resolve();
+      });
+      await video.play();
+      setDims({ w: video.videoWidth, h: video.videoHeight });
+
       setRunning(true);
       intervalRef.current = setInterval(captureAndSend, CAPTURE_INTERVAL_MS);
     } catch (e) {
-      setError("Could not access the camera. Check permissions and that you're on HTTPS (or localhost).");
+      if (e.name === "NotAllowedError") {
+        setError("Camera permission was denied. Allow camera access in your browser's site settings and try again.");
+      } else if (e.name === "NotFoundError") {
+        setError("No camera was found on this device.");
+      } else {
+        setError(`Could not access the camera (${e.name || "unknown error"}).`);
+      }
     }
   }
 
@@ -41,7 +69,7 @@ export default function LiveDetector() {
 
   async function captureAndSend() {
     const video = videoRef.current;
-    if (!video || video.readyState < 2 || busy) return;
+    if (!video || video.readyState < 2 || busyRef.current) return;
     const canvas = captureCanvasRef.current;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -49,13 +77,16 @@ export default function LiveDetector() {
     ctx.drawImage(video, 0, 0);
     const base64 = canvas.toDataURL("image/jpeg", 0.7);
 
+    busyRef.current = true;
     setBusy(true);
     try {
       const data = await detectFromBase64(base64);
       setResult(data);
+      setError(null);
     } catch (e) {
-      setError(e?.response?.data?.error || "Live detection request failed.");
+      setError(e.message || "Live detection request failed.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
@@ -66,7 +97,7 @@ export default function LiveDetector() {
     <div className="grid md:grid-cols-2 gap-8">
       <div>
         <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black/40 aspect-video">
-          <video ref={videoRef} className="w-full h-full object-contain" muted playsInline />
+          <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-contain" />
           <DetectionCanvas sourceWidth={dims.w} sourceHeight={dims.h} detections={result?.detections} />
         </div>
 

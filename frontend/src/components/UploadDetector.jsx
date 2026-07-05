@@ -22,7 +22,7 @@ export default function UploadDetector() {
       const data = await detectFromFile(file);
       setResult(data);
     } catch (e) {
-      setError(e?.response?.data?.error || "Detection failed. Is the API running and reachable?");
+      setError(e.message || "Detection failed.");
     } finally {
       setLoading(false);
     }

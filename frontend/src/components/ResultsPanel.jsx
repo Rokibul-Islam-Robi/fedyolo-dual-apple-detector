@@ -1,3 +1,6 @@
+import ActionCard from "./ActionCard.jsx";
+import ConfidenceBarChart from "./ConfidenceBarChart.jsx";
+
 export default function ResultsPanel({ result }) {
   if (!result) {
     return (
@@ -7,7 +10,9 @@ export default function ResultsPanel({ result }) {
     );
   }
 
-  const { leaf_stream = [], fruit_stream = [], counts, inference_ms, demo_mode } = result;
+  const { detections = [], leaf_stream = [], fruit_stream = [], counts, inference_ms, demo_mode } = result;
+
+  const uniqueClasses = [...new Set(detections.map((d) => d.class_name))];
 
   return (
     <div className="space-y-4">
@@ -24,8 +29,29 @@ export default function ResultsPanel({ result }) {
         <span>{inference_ms} ms inference</span>
       </div>
 
+      <div className="border border-white/10 rounded-xl p-4 bg-canopy/40">
+        <h3 className="font-display text-sm mb-3 text-parchment">Detection confidence</h3>
+        <ConfidenceBarChart detections={detections} />
+      </div>
+
       <StreamBlock title="Leaf pathology stream" accent="text-leaf-light" items={leaf_stream} />
       <StreamBlock title="Fruit pathology stream" accent="text-scab" items={fruit_stream} />
+
+      {uniqueClasses.length > 0 && (
+        <div>
+          <h3 className="font-display text-sm mb-3 text-parchment">What to do next</h3>
+          <div className="space-y-3">
+            {uniqueClasses.map((cls) => (
+              <ActionCard key={cls} className={cls} />
+            ))}
+          </div>
+          <p className="text-[11px] text-mist/70 leading-relaxed mt-3">
+            General guidance only — not a substitute for your local agricultural extension
+            officer. Confirm product choice, dose, and pre-harvest interval against local
+            regulations before applying any fungicide or pesticide.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

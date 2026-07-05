@@ -10,17 +10,16 @@ export default function Home() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-mildew mb-4">
             Organ-aware · Federated · Explainable
           </p>
-          <h1 className="font-display text-4xl md:text-5xl leading-[1.1] mb-6">
-            One detector.
-            <br />
-            Two pathology streams.
-            <br />
-            <span className="text-leaf-light">Zero raw images leave the farm.</span>
+          <h1 className="font-display text-2xl md:text-3xl leading-[1.25] mb-4">
+            Multi-Class Apple Leaf and Fruit Disease Detection for Agro-Pathology Driven by a
+            Privacy-Preserving Federated Learning Framework with{" "}
+            <span className="text-leaf-light">Organ-Aware Dual-Stream YOLO</span> and Explainable AI
           </h1>
           <p className="text-mist leading-relaxed mb-8 max-w-md">
             FedYOLO-Dual detects eight apple leaf and fruit pathology classes from a single
-            YOLO backbone, then routes each finding into a leaf report and a fruit report —
-            without moving a single photo off the orchard where it was taken.
+            YOLO backbone, routes each finding into a leaf report and a fruit report, and tells
+            farmers what to do next — without moving a single photo off the orchard where it
+            was taken.
           </p>
           <div className="flex gap-4">
             <Link
