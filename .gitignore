@@ -1,0 +1,16 @@
+# Python / Django
+__pycache__/
+*.pyc
+backend/.env
+backend/staticfiles/
+venv/
+.venv/
+
+# Node / Vite
+node_modules/
+frontend/dist/
+frontend/.env
+.DS_Store
+
+# Misc
+*.log

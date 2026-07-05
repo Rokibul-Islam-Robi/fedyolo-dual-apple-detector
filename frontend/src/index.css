@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "IBM Plex Sans", sans-serif;
+  background-color: #0f1912;
+}
+
+.font-display {
+  font-family: "Fraunces", serif;
+}
+
+.font-mono {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+::selection {
+  background: #4c7a56;
+  color: #0f1912;
+}
+
+.vein-divider {
+  background: linear-gradient(90deg, transparent, rgba(156, 178, 160, 0.35), transparent);
+  height: 1px;
+}
+
+/* respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid #d6a94b;
+  outline-offset: 2px;
+}
